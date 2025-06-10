@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atmossphair Hair Slot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0eaff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px;
+      color: #333;
+    }
+    h1 {
+      color: #6c5ce7;
+    }
+    #balance-section, #bet-section {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+    button {
+      margin: 0 5px;
+      font-size: 18px;
+      padding: 5px 12px;
+      cursor: pointer;
+      background-color: #ececec;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      user-select: none;
+    }
+    button:hover:not(:disabled) {
+      background-color: #dcd6ff;
+    }
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    #grid {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+      height: 210px; /* 3 emoji x 70px */
+      overflow: hidden;
+      border: 3px solid #cfc2ff;
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      box-shadow: 0 0 15px #a29bfe66;
+    }
+    .column {
+      width: 70px;
+      height: 210px; /* 3 emoji height */
+      overflow: hidden;
+      border-radius: 12px;
+      border: 2px solid #d3cfff;
+      background: #f9f7ff;
+      position: relative;
+    }
+    .reel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 70px;
+      /* yükseklik animasyona göre */
+    }
+    .emoji {
+      height: 70px;
+      font-size: 50px;
+      line-height: 70px;
+      text-align: center;
+      user-select: none;
+      color: #6c5ce7;
+      text-shadow: 0 0 5px #a29bfe;
+    }
+    .highlight {
+      background-color: #a29bfe66;
+      border-radius: 8px;
+      box-shadow: 0 0 15px #6c5ce7bb;
+    }
+    #message {
+      font-size: 20px;
+      height: 30px;
+      margin-bottom: 15px;
+      min-width: 280px;
+      color: #444;
+      min-height: 30px;
+    }
+    input[type=number] {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 18px;
+      text-align: center;
+      width: 70px;
+      padding: 4px;
+      outline-color: #7b5fc4;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Atmossphair Hair Slot</h1>
+
+  <div id="balance-section">
+    Bakiye: <span id="balanceDisplay">500</span>₺
+  </div>
+
+  <div id="bet-section">
+    Bahis: 
+    <button id="bet-decrease">-</button>
+    <input type="number" id="betInput" value="10" min="1" step="1" />
+    <button id="bet-increase">+</button>
+  </div>
+
+  <div id="grid"></div>
+
+  <div>
+    <button id="spinBtn">Döndür</button>
+    <button id="autoSpinBtn">Otomatik Döndür</button>
+  </div>
+
+  <div id="message"></div>
+
+<script>
+  const hairEmojis = ["💇‍♀️","👩‍🦰","👩‍🦱","👩‍🦳","👩‍","👱‍♀️"];
+  const rows = 3;
+  const columns = 5;
+  const reelExtra = 10; // animasyon için ekstra emoji sayısı
+  const emojiHeight = 70;
+
+  const grid = document.getElementById('grid');
+  const balanceDisplay = document.getElementById('balanceDisplay');
+  const betInput = document.getElementById('betInput');
+  const spinBtn = document.getElementById('spinBtn');
+  const autoSpinBtn = document.getElementById('autoSpinBtn');
+  const messageEl = document.getElementById('message');
+  const betIncreaseBtn = document.getElementById('bet-increase');
+  const betDecreaseBtn = document.getElementById('bet-decrease');
+
+  let balance = 500;
+  let bet = 10;
+  let autoSpinActive = false;
+  let autoSpinInterval;
+
+  function updateDisplay() {
+    balanceDisplay.textContent = balance.toFixed(2);
+    betInput.value = bet;
+  }
+
+  betIncreaseBtn.onclick = () => {
+    bet = Math.min(balance, bet + 1);
+    updateDisplay();
+  };
+  betDecreaseBtn.onclick = () => {
+    bet = Math.max(1, bet - 1);
+    updateDisplay();
+  };
+  betInput.onchange = () => {
+    let val = parseInt(betInput.value);
+    if (isNaN(val) || val < 1) val = 1;
+    if (val > balance) val = balance;
+    bet = val;
+    updateDisplay();
+  };
+
+  // Grid'i oluştur (her sütun için reel div)
+  function createGrid() {
+    grid.innerHTML = '';
+    for(let c=0; c<columns; c++) {
+      const colDiv = document.createElement('div');
+      colDiv.classList.add('column');
+
+      const reelDiv = document.createElement('div');
+      reelDiv.classList.add('reel');
+      reelDiv.style.top = '0px';
+      reelDiv.style.transition = 'none';
+
+      colDiv.appendChild(reelDiv);
+      grid.appendChild(colDiv);
+    }
+  }
+
+  createGrid();
+
+  // Rastgele emoji seç
+  function getRandomEmoji() {
+    return hairEmojis[Math.floor(Math.random() * hairEmojis.length)];
+  }
+
+  // Animasyon için reel içine emoji doldur
+  function fillReelAnimation(reel) {
+    reel.innerHTML = '';
+    for(let i=0; i<rows + reelExtra; i++) {
+      const emojiDiv = document.createElement('div');
+      emojiDiv.classList.add('emoji');
+      emojiDiv.textContent = getRandomEmoji();
+      reel.appendChild(emojiDiv);
+    }
+  }
+
+  // Sonuçları oluştur (3x5)
+  function generateResults() {
+    let results = [];
+    for(let r=0; r<rows; r++) {
+      let row = [];
+      for(let c=0; c<columns; c++) {
+        row.push(getRandomEmoji());
+      }
+      results.push(row);
+    }
+    return results;
+  }
+
+  // Sonuçları göster (reel'i resetleyip sadece 3 emoji göster)
+  function showResults(results) {
+    const columnsDivs = grid.querySelectorAll('.column');
+    for(let c=0; c<columns; c++) {
+      const reel = columnsDivs[c].querySelector('.reel');
+      reel.style.transition = 'none';
+      reel.style.top = '0px';
+      reel.innerHTML = '';
+      for(let r=0; r<rows; r++) {
+        const emojiDiv = document.createElement('div');
+        emojiDiv.classList.add('emoji');
+        emojiDiv.textContent = results[r][c];
+        reel.appendChild(emojiDiv);
+      }
+    }
+  }
+
+  // Kazananları kontrol et (aynı satırdaki ardışık 3+ eş emoji)
+  function checkWin(results) {
+    let totalWinCount = 0;
+    let winningPositions = [];
+
+    for(let r=0; r<rows; r++) {
+      let count = 1;
+      for(let c=1; c<columns; c++) {
+        if(results[r][c] === results[r][c-1]) {
+          count++;
+        } else {
+          if(count >= 3) {
+            totalWinCount += count - 2;
+            for(let k=c-count; k<c; k++) {
+              winningPositions.push({row: r, col: k});
+            }
+          }
+          count = 1;
+        }
+      }
+      if(count >= 3) {
+        totalWinCount += count - 2;
+        for(let k=columns - count; k<columns; k++) {
+          winningPositions.push({row: r, col: k});
+        }
+      }
+    }
+
+    return {
+      totalWin: totalWinCount,
+      winningLines: winningPositions
+    };
+  }
+
+  // Kazananları vurgula
+  function highlightWins(positions) {
+    clearHighlights();
+    const columnsDivs = grid.querySelectorAll('.column');
+    positions.forEach(pos => {
+      const reel = columnsDivs[pos.col].querySelector('.reel');
+      const emojiDivs = reel.children;
+      if(emojiDivs[pos.row]) {
+        emojiDivs[pos.row].classList.add('highlight');
+      }
+    });
+  }
+
+  function clearHighlights() {
+    document.querySelectorAll('.emoji.highlight').forEach(el => {
+      el.classList.remove('highlight');
+    });
+  }
+
+  // Spin animasyonu
+  async function spinAnimation(results) {
+    spinBtn.disabled = true;
+    autoSpinBtn.disabled = true;
+    betIncreaseBtn.disabled = true;
+    betDecreaseBtn.disabled = true;
+    betInput.disabled = true;
+    messageEl.textContent = "Dönüyor...";
+
+    const columnsDivs = grid.querySelectorAll('.column');
+
+    // Önce her reel için animasyon emojilerini yerleştir
+    for(let c=0; c<columns; c++) {
+      fillReelAnimation(columnsDivs[c].querySelector('.reel'));
+    }
+
+    // Animasyon parametreleri
+    const duration = 3000; // animasyon süresi ms
+    const fps = 60;
+    const totalFrames = Math.round(duration / (1000 / fps));
+
+    // Her sütun animasyon gecikmesi farklı olacak (sütun bazlı kaydırma farkı)
+    let promises = [];
+
+    for(let c=0; c<columns; c++) {
+      const reel = columnsDivs[c].querySelector('.reel');
+      // Animasyon hedef pozisyonu
+      // reelExtra kadar yukarı kaydıracağız (px)
+      // reel.style.top pozitiften negatife kayar
+      let startTime = null;
+      let startTop = 0;
+      let endTop = -emojiHeight * reelExtra;
+      let delay = c * 150; // sütun gecikmesi ms
+
+      promises.push(new Promise(resolve => {
+        function animate(timestamp) {
+          if(!startTime) startTime = timestamp;
+          let elapsed = timestamp - startTime - delay;
+          if(elapsed < 0) elapsed = 0;
+
+          let progress = Math.min(elapsed / duration, 1);
+          // Ease out cubic
+          let easeProgress = 1 - Math.pow(1 - progress, 3);
+          let currentTop = startTop + (endTop - startTop) * easeProgress;
+          reel.style.top = currentTop + 'px';
+
+          if(progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            resolve();
+          }
+        }
+        requestAnimationFrame(animate);
+      }));
+    }
+
+    await Promise.all(promises);
+
+    // Animasyon bitti, sonuçları göster
+    showResults(results);
+
+    // Kazanma kontrolü ve vurgulama
+    const winInfo = checkWin(results);
+    clearHighlights();
+    if(winInfo.totalWin > 0) {
+      highlightWins(winInfo.winningLines);
+      const winAmount = bet * winInfo.totalWin;
+      messageEl.textContent = `Kazandınız! +${winAmount.toFixed(2)}₺`;
+      await animateBalance(balance, balance + winAmount);
+    } else {
+      messageEl.textContent = 'Kaybettiniz, tekrar deneyin!';
+      await animateBalance(balance, balance - bet);
+    }
+
+    spinBtn.disabled = false;
+    autoSpinBtn.disabled = false;
+    betIncreaseBtn.disabled = false;
+    betDecreaseBtn.disabled = false;
+    betInput.disabled = false;
+  }
+
+  // Bakiye animasyonu
+  function animateBalance(from, to) {
+    return new Promise(resolve => {
+      let current = from;
+      const steps = 20;
+      const stepAmount = (to - from) / steps;
+      let stepCount = 0;
+      const interval = setInterval(() => {
+        current += stepAmount;
+        stepCount++;
+        if(stepCount >= steps) {
+          clearInterval(interval);
+          balance = to;
+          updateDisplay();
+          resolve();
+        }
+        balanceDisplay.textContent = current.toFixed(2);
+      }, 40);
+    });
+  }
+
+  spinBtn.onclick = async () => {
+    if(bet > balance) {
+      messageEl.textContent = "Bakiyeniz yetersiz!";
+      return;
+    }
+    messageEl.textContent = "";
+    const results = generateResults();
+    await spinAnimation(results);
+  };
+
+  autoSpinBtn.onclick = () => {
+    if(autoSpinActive) {
+      clearInterval(autoSpinInterval);
+      autoSpinActive = false;
+      autoSpinBtn.textContent = "Otomatik Döndür";
+      spinBtn.disabled = false;
+      betIncreaseBtn.disabled = false;
+      betDecreaseBtn.disabled = false;
+      betInput.disabled = false;
+      messageEl.textContent = "Otomatik döndürme durduruldu.";
+    } else {
+      if(bet > balance) {
+        messageEl.textContent = "Bakiyeniz yetersiz!";
+        return;
+      }
+      autoSpinActive = true;
+      autoSpinBtn.textContent = "Durdur";
+      spinBtn.disabled = true;
+      betIncreaseBtn.disabled = true;
+      betDecreaseBtn.disabled = true;
+      betInput.disabled = true;
+      messageEl.textContent = "Otomatik döndürme aktif.";
+      autoSpinInterval = setInterval(async () => {
+        if(bet > balance) {
+          messageEl.textContent = "Bakiyeniz bitti, otomatik döndürme durduruldu.";
+          autoSpinBtn.click();
+          return;
+        }
+        const results = generateResults();
+        await spinAnimation(results);
+      }, 3800);
+    }
+  };
+
+  updateDisplay();
+</script>
+
+</body>
+</html>
