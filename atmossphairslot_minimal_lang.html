@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atmossphair Hair Slot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet" />
+  <style>
+    /* --- GENEL -- */
+    :root {
+      --slot-width: 620px;
+      --slot-height: 240px;
+    }
+    html, body {
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+      font-family: "Poppins", "Segoe UI Symbol", Arial, sans-serif;
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+    body {
+      background: #111;
+      color: #eee;
+      min-height: 100vh;
+      min-width: 100vw;
+    }
+    body.daymode {
+      background: #fafafa;
+      color: #212121;
+    }
+
+    /* --- DİL SEÇİCİ -- */
+    #lang-wrap {
+      position: fixed;
+      top: 18px;
+      left: 14px;
+      z-index: 100000;
+      user-select: none;
+    }
+    #languageSelector {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px 8px 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.10);
+      font-weight: 500;
+      font-size: 17px;
+      color: inherit;
+      min-width: 120px;
+      transition: background 0.2s;
+      position: relative;
+      z-index: 10001;
+    }
+    #languageSelector:hover,
+    #languageSelector:focus {
+      background: rgba(255,255,255,0.09);
+      outline: none;
+    }
+    #languageSelector img {
+      width: 24px;
+      height: 16px;
+      border-radius: 2px;
+      object-fit: cover;
+    }
+    #lang-arrow {
+      margin-left: 4px;
+      width: 13px;
+      height: 13px;
+      pointer-events: none;
+    }
+    #languageDropdown {
+      display: none;
+      position: absolute;
+      top: 44px;
+      left: 0;
+      min-width: 140px;
+      background: #222;
+      border: 1px solid #555;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.14);
+      flex-direction: column;
+      z-index: 10001;
+      padding: 3px 0;
+      font-size: 15px;
+      user-select: none;
+    }
+    body.daymode #languageDropdown {
+      background: #fff;
+      border-color: #ccc;
+    }
+    .langOption {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px 7px 12px;
+      cursor: pointer;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+      border: none;
+      outline: none;
+    }
+    .langOption:hover,
+    .langOption:focus {
+      background: rgba(0,0,0,0.08);
+    }
+    body.daymode .langOption:hover,
+    body.daymode .langOption:focus {
+      background: rgba(0,0,0,0.07);
+    }
+
+    /* --- OYUN BÖLÜMÜ --- */
+    .game-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 70px;
+      width: 100vw;
+      box-sizing: border-box;
+      position: relative;
+      min-height: 100vh;
+    }
+    h1#title {
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      margin: 0 0 28px;
+      max-width: 95vw;
+      text-align: center;
+      line-height: 1.2;
+      white-space: pre-line;
+      word-break: break-word;
+    }
+    .slot-area-wrap {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 12px;
+      width: 100vw;
+      box-sizing: border-box;
+      margin-bottom: 0;
+    }
+    .slot-area {
+      width: var(--slot-width);
+      height: var(--slot-height);
+      background: #111;
+      border-radius: 18px;
+      border: 3px solid #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.7);
+      overflow: hidden;
+      margin-bottom: 0;
+      transition: background 0.3s, border-color 0.3s;
+      box-sizing: border-box;
+    }
+    body.daymode .slot-area {
+      background: #fafafa;
+      border-color: #ccc;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+    }
+    .slots-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      box-sizing: border-box;
+    }
+    .slot-symbol {
+      width: 56px;
+      height: 72px;
+      font-size: 2.8rem;
+      background: #232323;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 7px;
+      box-shadow: 0 2px 8px #0007;
+      color: #ddd;
+      opacity: 0;
+      transform: translateY(-220px) scale(1.18);
+      transition:
+        transform 0.92s cubic-bezier(.4,1.7,.47,.87),
+        opacity 0.33s cubic-bezier(.42,0,.58,1),
+        box-shadow 0.25s;
+      will-change: transform, opacity;
+      border: 2px solid #292929;
+    }
+    body.daymode .slot-symbol {
+      background: #eee;
+      color: #222;
+    }
+    .slot-symbol.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1.0);
+      box-shadow: 0 0 18px #fff4, 0 4px 12px #0006;
+    }
+    .slot-symbol.winner {
+      background: #3fc86d;
+      color: #153f22;
+      border-color: #2e7d32;
+      animation: slotwinpulse 1.2s;
+    }
+    .slot-symbol.diamond {
+      background: #50e6ff;
+      color: #006b7f;
+      border-color: #36c7e6;
+    }
+    .slot-symbol.bigwin {
+      animation: bigwinpulse 1.2s 2;
+      box-shadow: 0 0 18px 7px #fff6, 0 0 20px 10px #ffe06677;
+      border: 3px solid #fbbf24 !important;
+      background: #fffbe7 !important;
+      color: #e09b00 !important;
+      transform: scale(1.16);
+      z-index: 2;
+    }
+    .slot-symbol.special-anim {
+      animation: specialGlow 1s infinite alternate;
+      box-shadow: 0 0 18px 7px #ffe06699, 0 0 20px 10px #fffce077;
+      border: 3px solid #ffe066 !important;
+      background: #fff9c6 !important;
+      color: #c49f00 !important;
+    }
+    @keyframes slotwinpulse {
+      0% { box-shadow: 0 0 0 0 #66ffbb66; }
+      50% { box-shadow: 0 0 14px 8px #98ffb688; }
+      100% { box-shadow: 0 0 0 0 #66ffbb66; }
+    }
+    @keyframes bigwinpulse {
+      0% { box-shadow: 0 0 0 0 #ffe06600, 0 0 0 0 #fff; }
+      40% { box-shadow: 0 0 20px 14px #ffe06666, 0 0 24px 10px #fff9; }
+      60% { box-shadow: 0 0 24px 20px #fffbe7aa, 0 0 32px 20px #ffe066; }
+      100% { box-shadow: 0 0 0 0 #ffe06600, 0 0 0 0 #fff; }
+    }
+    @keyframes specialGlow {
+      0% { box-shadow: 0 0 16px 4px #ffe06699, 0 0 0 0 #fffce077; }
+      100% { box-shadow: 0 0 40px 20px #ffe066cc, 0 0 34px 14px #fffbe7bb; }
+    }
+    .lever {
+      width: 16px;
+      height: 125px;
+      background: linear-gradient(180deg, #ddd 10%, #656565 80%, #222 100%);
+      border-radius: 10px 10px 7px 7px;
+      border: 2px solid #8f8f8f;
+      box-shadow: 2px 8px 18px 2px rgba(0,0,0,0.20), 0 2px 8px rgba(0,0,0,0.15);
+      cursor: pointer;
+      position: relative;
+      margin-left: 0;
+      margin-right: 0;
+      transition: box-shadow 0.2s;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      user-select: none;
+    }
+    .lever:before {
+      content: "";
+      position: absolute;
+      top: -11px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle at 30% 30%, #ffe066, #ffa600 80%, #b18600 100%);
+      border: 2px solid #d2b600;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15), inset 0 2px 6px rgba(255,255,255,0.18);
+      border-radius: 50%;
+      z-index: 2;
+    }
+    .lever:active {
+      box-shadow: 0 2px 8px 0 #000;
+    }
+    .lever.pull {
+      animation: leverpull 0.45s cubic-bezier(.22,1,.36,1) forwards;
+    }
+    @keyframes leverpull {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(38px); }
+      100% { transform: translateY(0); }
+    }
+    .slot-bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      width: var(--slot-width);
+      max-width: 98vw;
+      margin: 0 auto 14px;
+      margin-top: 14px;
+      box-sizing: border-box;
+    }
+    #betDisplay {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-align: left;
+      font-size: 15px;
+      padding-left: 2px;
+      background: none;
+      min-width: 120px;
+      max-width: 50vw;
+    }
+    #betLabel {
+      font-size: 15px;
+    }
+    #balance {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 18px;
+      text-align: right;
+      padding-right: 6px;
+      background: none;
+    }
+    .currency-sign {
+      font-size: 18px;
+      margin-left: 2px;
+      font-family: "Segoe UI Symbol", Arial, sans-serif;
+    }
+    #freespin-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 0 auto 0 auto;
+      margin-bottom: 8px;
+      width: var(--slot-width);
+      max-width: 98vw;
+      font-size: 17px;
+      font-weight: 500;
+      color: #00e0c6;
+      letter-spacing: 0.03em;
+      text-align: center;
+      user-select: none;
+    }
+    #freespin-diamond {
+      font-size: 1.45em;
+      margin-right: 2px;
+      vertical-align: middle;
+      filter: drop-shadow(0 0 4px #36c7e6);
+      display: inline-block;
+    }
+    #message {
+      min-height: 36px;
+      font-size: 17px;
+      font-weight: 500;
+      color: #fff9;
+      margin: 0 818px;
+      width: var(--slot-width);
+      max-width: 98vw;
+      text-align: center;
+      letter-spacing: 0.02em;
+      animation: none;
+      display: block;
+    }
+    .buttons-row {
+      width: var(--slot-width);
+      max-width: 98vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 44px auto 0;
+      gap: 18px;
+      padding-bottom: 24px;
+      box-sizing: border-box;
+    }
+    .betButton, #startButton, #autoButton {
+      background-color: #2575fc;
+      color: #eee;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      padding: 6px 9px;
+      cursor: pointer;
+      font-weight: 500;
+      margin: 0 1px;
+      min-width: 30px;
+      min-height: 30px;
+      transition: background-color 0.2s, transform 0s;
+      animation: none !important;
+    }
+    .betButton:disabled, #startButton:disabled, #autoButton:disabled {
+      background-color: #444;
+      color: #aaa;
+      cursor: not-allowed;
+    }
+    #startButton, #autoButton {
+      min-width: 110px;
+      min-height: 42px;
+      font-size: 18px;
+      margin: 0 8px;
+    }
+    #autoButton.active {
+      background-color: #fbbf24;
+      color: #222;
+    }
+    #betAmount {
+      width: 38px;
+      padding: 4px 5px;
+      font-size: 13px;
+      text-align: center;
+      border: 2px solid #555;
+      border-radius: 5px;
+      background: #1a1a1a;
+      color: #eee;
+      font-weight: 300;
+      font-family: inherit;
+      margin-left: 2px;
+    }
+    body.daymode #betAmount {
+      background: #f9f9f9;
+      color: #222;
+      border-color: #aaa;
+    }
+
+    /* GÜNDÜZ / GECE MOD BUTONU */
+    #modeToggleBtn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10001;
+      background: none;
+      border: none;
+      border-radius: 50%;
+      width: 46px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 2px 8px #0002;
+    }
+    #modeToggleBtn:focus, #modeToggleBtn:hover {
+      background: #2222;
+    }
+    #sunIcon { display: none; }
+    #moonIcon { display: block; }
+    body.daymode #sunIcon { display: block !important; }
+    body.daymode #moonIcon { display: none !important; }
+
+    @media (max-width: 800px) {
+      :root { --slot-width: 98vw; }
+      .slot-area, .slot-bottom-row, #message, .buttons-row, #freespin-wrap {
+        width: 98vw;
+        max-width: 98vw;
+      }
+      .slot-symbol {
+        font-size: 1.8rem;
+        width: 32px;
+        height: 38px;
+      }
+      #betAmount {
+        width: 22px;
+        font-size: 10px;
+      }
+      #startButton, #autoButton {
+        font-size: 12px;
+        min-width: 70px;
+        min-height: 30px;
+      }
+      h1#title {
+        font-size: 1rem;
+        margin-bottom: 12px;
+      }
+      #betDisplay {
+        min-width: 66px;
+      }
+      .buttons-row {
+        margin-top: 28px;
+        gap: 8px;
+      }
+    }
+  
+@media (max-width: 600px) {
+  #autoButton {
+    font-size: 0;
+    min-width: 42px;
+    position: relative;
+  }
+
+  #autoButton::before {
+    content: "∞";
+    font-size: 22px;
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+
+#languageSelector {
+  padding: 4px 10px;
+  font-size: 14px;
+  min-width: auto;
+  border-radius: 6px;
+}
+#languageSelector img {
+  width: 20px;
+  height: 14px;
+}
+#lang-arrow {
+  width: 10px;
+  height: 10px;
+  margin-left: 2px;
+}
+
+</style>
+</head>
+<body>
+
+  <!-- DİL SEÇİCİ -->
+  <div id="lang-wrap">
+    <button id="languageSelector" aria-haspopup="true" aria-expanded="false" type="button" aria-label="Dil seçici">
+      <img id="langFlag" src="https://flagcdn.com/w20/tr.png" alt="Türk bayrağı" />
+      <span id="langName">Türkçe</span>
+      <svg id="lang-arrow" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 10 6"><path fill="#888" d="M0 0L5 6L10 0H0Z"/></svg>
+    </button>
+    <div id="languageDropdown" role="menu" aria-label="Dil seçenekleri">
+      <button class="langOption" data-lang="tr" type="button"><img src="https://flagcdn.com/w20/tr.png" alt="Türk bayrağı" />Türkçe</button>
+      <button class="langOption" data-lang="en" type="button"><img src="https://flagcdn.com/w20/gb.png" alt="İngiliz bayrağı" />English</button>
+      <button class="langOption" data-lang="ru" type="button"><img src="https://flagcdn.com/w20/ru.png" alt="Rus bayrağı" />Русский</button>
+    </div>
+  </div>
+
+  <!-- OYUN BÖLÜMÜ -->
+  <div class="game-section">
+    <h1 id="title">Atmossphair Hair Slot</h1>
+    <div class="slot-area-wrap">
+      <div class="slot-area" id="gameArea">
+        <div class="slots-inner" id="slotsInner"></div>
+      </div>
+      <button class="lever" id="lever" aria-label="Slot makinesi kolu" title="Slot makinesi kolunu çek" type="button"></button>
+    </div>
+    <div id="freespin-wrap">
+      <span id="freespin-diamond" aria-label="Diamond" title="Diamond">💎</span>
+      <span id="freespin-label">Free Spin:</span>
+      <span id="freespin-count">10</span>
+    </div>
+    <div class="slot-bottom-row">
+      <div id="betDisplay">
+        <span id="betLabel">Bahis Tutarı:</span>
+        <button class="betButton" id="betMinus" aria-label="Bahsi azalt">-</button>
+        <input type="number" id="betAmount" value="100" min="10" max="500" step="10" aria-label="Bahis miktarı" />
+        <button class="betButton" id="betPlus" aria-label="Bahsi artır">+</button>
+      </div>
+      <div id="balance" aria-live="polite" aria-label="Bakiye">
+        <span id="balanceText">Bakiye: </span><span id="balanceValue">1000</span><span class="currency-sign">₺</span>
+      </div>
+    </div>
+    <div id="message" aria-live="assertive"></div>
+    <div class="buttons-row">
+      <button id="startButton">Döndür</button>
+      <button id="autoButton" aria-pressed="false">Otomatik Döndür</button>
+    </div>
+  </div>
+
+  <!-- GÜNDÜZ/GECE MOD BUTONU -->
+  <button id="modeToggleBtn" aria-label="Gündüz/Gece modu değiştir" title="Gündüz/Gece modu değiştir" type="button" aria-pressed="false">
+    <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="28" height="28" aria-hidden="true" focusable="false">
+      <circle cx="20" cy="20" r="9" stroke="#f3d243" stroke-width="2" fill="#f3d243"/>
+      <g stroke="#f3d243" stroke-width="2">
+        <line x1="20" y1="3" x2="20" y2="8"/>
+        <line x1="20" y1="32" x2="20" y2="37"/>
+        <line x1="3" y1="20" x2="8" y2="20"/>
+        <line x1="32" y1="20" x2="37" y2="20"/>
+        <line x1="8.93" y1="8.93" x2="13.07" y2="13.07"/>
+        <line x1="26.93" y1="26.93" x2="31.07" y2="31.07"/>
+        <line x1="8.93" y1="31.07" x2="13.07" y2="26.93"/>
+        <line x1="26.93" y1="13.07" x2="31.07" y2="8.93"/>
+      </g>
+    </svg>
+    <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="28" height="28" aria-hidden="true" focusable="false">
+      <path d="M26 36c-8.837 0-16-7.163-16-16 0-6.627 3.99-12.28 9.71-14.85-1.13 2.04-1.71 4.35-1.71 6.85 0 8.837 7.163 16 16 16 2.5 0 4.81-0.58 6.85-1.71C38.28 32.01 32.627 36 26 36z" fill="#343d55"/>
+    </svg>
+  </button>
+
+<script>
+  (function() {
+    /* --- DİL VE ÇEVİRİ --- */
+    const translations = {
+      tr: {
+        title: "Atmossphair Hair Slot",
+        balance: "Bakiye: ",
+        betAmount: "Bahis Tutarı:",
+        start: "Döndür",
+        auto: "Otomatik Döndür",
+        noWin: "Üzgünüz, kazanamadınız. Tekrar deneyin!",
+        win: "Tebrikler! Toplam {amount} <span class='currency-sign'>₺</span> kazandınız!",
+        autoStopped: "Otomatik oyun durduruldu.",
+        autoStarted: "Otomatik döndürme başlatıldı.",
+        autoStoppedManually: "Otomatik döndürme durduruldu.",
+        betTooLow: "Lütfen 10 ile 500 arasında geçerli bir bahis giriniz.",
+        leverTitle: "Slot makinesi kolunu çek",
+        freeSpin: "Free Spin:",
+        diamondBonus: "+5 Free Spin! (Elmas Yakalandı)"
+      },
+      en: {
+        title: "Atmossphair Hair Slot",
+        balance: "Balance: ",
+        betAmount: "Bet Amount:",
+        start: "Spin",
+        auto: "Auto Spin",
+        noWin: "Sorry, you lost. Try again!",
+        win: "Congratulations! You won a total of {amount} <span class='currency-sign'>₺</span>!",
+        autoStopped: "Auto spin stopped.",
+        autoStarted: "Auto spin started.",
+        autoStoppedManually: "Auto spin stopped.",
+        betTooLow: "Please enter a valid bet between 10 and 500.",
+        leverTitle: "Pull the slot machine lever",
+        freeSpin: "Free Spin:",
+        diamondBonus: "+5 Free Spins! (Diamond Hit)"
+      },
+      ru: {
+        title: "Atmossphair Hair Slot",
+        balance: "Баланс: ",
+        betAmount: "Ставка:",
+        start: "Крутить",
+        auto: "Авто Крутить",
+        noWin: "К сожалению, вы проиграли. Попробуйте снова!",
+        win: "Поздравляем! Вы выиграли всего {amount} <span class='currency-sign'>₺</span>!",
+        autoStopped: "Авто крутка остановлена.",
+        autoStarted: "Авто крутка запущена.",
+        autoStoppedManually: "Авто крутка остановлена.",
+        betTooLow: "Пожалуйста, введите ставку от 10 до 500.",
+        leverTitle: "Дернуть рычаг слот-машины",
+        freeSpin: "Free Spin:",
+        diamondBonus: "+5 Free Spin! (Драгоценный камень!)"
+      }
+    };
+    const langs = [
+      { code: "tr", name: "Türkçe", flag: "https://flagcdn.com/w20/tr.png" },
+      { code: "en", name: "English", flag: "https://flagcdn.com/w20/gb.png" },
+      { code: "ru", name: "Русский", flag: "https://flagcdn.com/w20/ru.png" }
+    ];
+    let currentLang = "tr";
+
+    /* --- OYUN VERİLERİ --- */
+    let balance = 1000;
+    let freeSpin = 10;
+    let motivationalQuoteIndex = -1;
+    const DIAMOND = "💎";
+    const symbolsBase = ["💇‍♀️", "💆‍♀️", "👩‍🦳", "👱‍♀️", "👩", "👩‍🦰"];
+
+    /* --- DOM ELEMENTLERİ --- */
+    const slotsInner = document.getElementById("slotsInner");
+    const balanceText = document.getElementById("balanceText");
+    const balanceValue = document.getElementById("balanceValue");
+    const messageDisplay = document.getElementById("message");
+    const betInput = document.getElementById("betAmount");
+    const betMinusBtn = document.getElementById("betMinus");
+    const betPlusBtn = document.getElementById("betPlus");
+    const startButton = document.getElementById("startButton");
+    const autoButton = document.getElementById("autoButton");
+    const lever = document.getElementById("lever");
+    const titleEl = document.getElementById("title");
+    const betLabel = document.getElementById("betLabel");
+    const freeSpinLabel = document.getElementById("freespin-label");
+    const freeSpinCount = document.getElementById("freespin-count");
+
+    /* --- DURUM VE FLAG --- */
+    let autoPlayInterval = null;
+    let spinning = false;
+    let darkMode = true;
+
+    /* --- FONKSİYONLAR --- */
+    function updateTexts() {
+      const t = translations[currentLang];
+      titleEl.textContent = t.title;
+      betLabel.textContent = t.betAmount;
+      startButton.textContent = t.start;
+      autoButton.textContent = t.auto;
+      lever.title = t.leverTitle;
+      lever.setAttribute("aria-label", t.leverTitle);
+      balanceText.textContent = t.balance;
+      freeSpinLabel.textContent = t.freeSpin;
+      balanceValue.textContent = balance;
+      freeSpinCount.textContent = freeSpin;
+    }
+    function updateFreeSpinDisplay() {
+      freeSpinCount.textContent = freeSpin;
+    }
+    function showResultMessage(content) {
+      messageDisplay.innerHTML = content;
+    }
+    function adjustBet(amount) {
+      let currentBet = parseInt(betInput.value) || 0;
+      currentBet += amount;
+      if (currentBet < 10) currentBet = 10;
+      if (currentBet > 500) currentBet = 500;
+      betInput.value = currentBet;
+      updateButtonsState();
+    }
+    function updateButtonsState() {
+      const bet = parseInt(betInput.value) || 0;
+      betMinusBtn.disabled = bet <= 10;
+      betPlusBtn.disabled = bet >= 500;
+      startButton.disabled = spinning || (bet > balance && freeSpin <= 0);
+      lever.disabled = spinning || (bet > balance && freeSpin <= 0);
+      autoButton.disabled = spinning && (balance < bet && freeSpin <= 0);
+      if (balance < bet && freeSpin <= 0 && autoButton.classList.contains("active")) stopAutoPlay();
+    }
+    function getRandomNonDiamond() {
+      return symbolsBase[Math.floor(Math.random() * symbolsBase.length)];
+    }
+    function getRandomSymbolsWithDiamondChance() {
+      if (Math.random() < 0.05) {
+        const pos = Math.floor(Math.random() * 5);
+        const arr = [];
+        for (let i = 0; i < 7; i++) {
+          if (i >= pos && i < pos + 3) arr.push(DIAMOND);
+          else arr.push(getRandomNonDiamond());
+        }
+        return arr;
+      } else if (Math.random() < 0.10) {
+        const positions = [];
+        while (positions.length < 3) {
+          const p = Math.floor(Math.random() * 7);
+          if (!positions.includes(p)) positions.push(p);
+        }
+        positions.sort((a,b)=>a-b);
+        if (positions[2] - positions[0] === 2 && positions[1] - positions[0] === 1) {
+          return getRandomSymbolsWithDiamondChance();
+        }
+        const arr = [];
+        for (let i = 0; i < 7; i++) {
+          if (positions.includes(i)) arr.push(DIAMOND);
+          else arr.push(getRandomNonDiamond());
+        }
+        return arr;
+      } else {
+        const arr = [];
+        for (let i = 0; i < 7; i++) arr.push(getRandomNonDiamond());
+        return arr;
+      }
+    }
+    function startGame() {
+      if (spinning) return;
+      spinning = true;
+      showResultMessage("");
+      let bet = parseInt(betInput.value);
+      if (isNaN(bet) || bet < 10 || bet > 500) {
+        alert(translations[currentLang].betTooLow);
+        spinning = false;
+        updateButtonsState();
+        return;
+      }
+      let useFreeSpin = freeSpin > 0;
+      if (!useFreeSpin && balance < bet) {
+        spinning = false;
+        updateButtonsState();
+        stopAutoPlay();
+        return;
+      }
+      if (useFreeSpin) {
+        freeSpin--;
+        updateFreeSpinDisplay();
+      } else {
+        balance -= bet;
+        balanceValue.textContent = balance;
+      }
+      updateButtonsState();
+      slotsInner.innerHTML = "";
+      let slotSymbols = getRandomSymbolsWithDiamondChance();
+      let placed = [];
+      for (let i = 0; i < 7; i++) {
+        const sdiv = document.createElement("div");
+        sdiv.className = "slot-symbol";
+        sdiv.textContent = slotSymbols[i];
+        if (slotSymbols[i] === DIAMOND) sdiv.classList.add("diamond");
+        slotsInner.appendChild(sdiv);
+        placed.push(sdiv);
+      }
+      placed.forEach((s, i) => {
+        setTimeout(()=>s.classList.add("visible"), 80 + i*70);
+      });
+      setTimeout(() => {
+        let currentWinCount = 1;
+        let winningSequences = [];
+        let diamondBonus = false;
+        let diamondOnly = false;
+        for (let i = 1; i < placed.length; i++) {
+          if (placed[i].textContent === placed[i - 1].textContent) {
+            currentWinCount++;
+          } else {
+            if (currentWinCount >= 3) {
+              winningSequences.push({ start: i - currentWinCount, length: currentWinCount, symbol: placed[i-1].textContent });
+            }
+            currentWinCount = 1;
+          }
+        }
+        if (currentWinCount >= 3) {
+          winningSequences.push({ start: placed.length - currentWinCount, length: currentWinCount, symbol: placed[placed.length-1].textContent });
+        }
+        let winnings = 0;
+        let bonusText = "";
+        let specialAnimTriggered = false;
+        winningSequences.forEach(seq => {
+          let multiplier = 0;
+          if (seq.symbol !== DIAMOND) {
+            if (seq.length === 3) multiplier = 2;
+            else if (seq.length === 4) multiplier = 3;
+            else if (seq.length >= 5) {
+              multiplier = 4;
+              for (let j = seq.start; j < seq.start + seq.length; j++) {
+                placed[j].classList.add("special-anim");
+              }
+              specialAnimTriggered = true;
+            }
+            if (multiplier > 0) {
+              winnings += bet * multiplier;
+              for (let j = seq.start; j < seq.start + seq.length; j++) {
+                placed[j].classList.add("winner");
+              }
+            }
+          }
+        });
+        if (winningSequences.length === 1 && winningSequences[0].symbol === DIAMOND && winningSequences[0].length >= 3) {
+          diamondBonus = true;
+          diamondOnly = true;
+        } else {
+          winningSequences.forEach(seq => {
+            if (seq.symbol === DIAMOND && seq.length >= 3) {
+              diamondBonus = true;
+            }
+          });
+        }
+        if (diamondBonus) {
+          freeSpin += 5;
+          updateFreeSpinDisplay();
+          bonusText = `<br><span style="color:#00e0c6;font-weight:700">${translations[currentLang].diamondBonus}</span>`;
+          if (diamondOnly) {
+            let seq = winningSequences[0];
+            for (let j = seq.start; j < seq.start + seq.length; j++) {
+              placed[j].classList.add("winner");
+            }
+          }
+        }
+        if (winnings > 0) {
+          balance += winnings;
+          balanceValue.textContent = balance;
+        }
+        if (diamondBonus && winnings === 0) {
+          showResultMessage(bonusText);
+        } else if (winnings > 0 || diamondBonus) {
+          let bigwinMsg = "";
+          if (specialAnimTriggered) {
+            bigwinMsg = "<br><span style='color:#ffe066;font-weight:700;font-size:1.35em;letter-spacing:0.08em;'>🌟 SÜPER SERİ! 🌟</span>";
+          }
+          showResultMessage(`<span style=\"color:#3fc86d;\">${translations[currentLang].win.replace("{amount}", winnings)}</span>` + bigwinMsg + bonusText);
+        } else {
+          showResultMessage(`<span style=\"color:#f55;\">${translations[currentLang].noWin}</span>`);
+        }
+        spinning = false;
+        updateButtonsState();
+        if (balance <= 0 && freeSpin <= 0) {
+          motivationalQuoteIndex = (motivationalQuoteIndex + 1) % motivationalQuotes.length;
+          showResultMessage(motivationalQuotes[motivationalQuoteIndex]);
+          stopAutoPlay();
+        } else if (balance < bet && freeSpin <= 0) {
+          stopAutoPlay();
+        }
+      }, 1100 + placed.length*70);
+    }
+    function stopAutoPlay() {
+      if (autoPlayInterval !== null) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+        autoButton.classList.remove("active");
+        autoButton.setAttribute("aria-pressed", "false");
+      }
+    }
+    function toggleAutoPlay() {
+      if (autoPlayInterval) {
+        stopAutoPlay();
+        showResultMessage(translations[currentLang].autoStoppedManually);
+      } else {
+        let bet = parseInt(betInput.value);
+        if (balance < bet && freeSpin <= 0) return;
+        autoButton.classList.add("active");
+        autoButton.setAttribute("aria-pressed", "true");
+        showResultMessage(translations[currentLang].autoStarted);
+        autoPlayInterval = setInterval(() => {
+          let bet = parseInt(betInput.value);
+          if (balance < bet && freeSpin <= 0) {
+            showResultMessage(translations[currentLang].autoStopped);
+            stopAutoPlay();
+            updateButtonsState();
+            return;
+          }
+          startGame();
+        }, 1700);
+      }
+      updateButtonsState();
+    }
+    /* --- EVENTLER --- */
+    betMinusBtn.addEventListener("click", () => adjustBet(-10));
+    betPlusBtn.addEventListener("click", () => adjustBet(10));
+    betInput.addEventListener("input", () => {
+      let val = parseInt(betInput.value);
+      if (isNaN(val) || val < 10) val = 10;
+      if (val > 500) val = 500;
+      betInput.value = val;
+      updateButtonsState();
+    });
+    startButton.addEventListener("click", startGame);
+    autoButton.addEventListener("click", toggleAutoPlay);
+    lever.addEventListener("click", () => {
+      if (spinning) return;
+      lever.classList.add("pull");
+      setTimeout(() => lever.classList.remove("pull"), 450);
+      setTimeout(startGame, 150);
+    });
+
+    /* --- DİL SEÇİCİ --- */
+    const langBtn = document.getElementById("languageSelector");
+    const langDropdown = document.getElementById("languageDropdown");
+    const langFlag = document.getElementById("langFlag");
+    const langName = document.getElementById("langName");
+    langBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const expanded = langBtn.getAttribute("aria-expanded") === "true";
+      if (!expanded) {
+        langDropdown.style.display = "flex";
+        langBtn.setAttribute("aria-expanded", "true");
+        let selectedBtn = langDropdown.querySelector(".langOption[data-lang='" + currentLang + "']");
+        if(selectedBtn) selectedBtn.focus();
+      } else {
+        langDropdown.style.display = "none";
+        langBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+    document.body.addEventListener("click", () => {
+      langDropdown.style.display = "none";
+      langBtn.setAttribute("aria-expanded", "false");
+    });
+    langDropdown.querySelectorAll(".langOption").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setLanguage(btn.getAttribute("data-lang"));
+        langDropdown.style.display = "none";
+        langBtn.setAttribute("aria-expanded", "false");
+        langBtn.focus();
+      });
+      btn.addEventListener("keydown", e => {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          let next = btn.nextElementSibling || langDropdown.firstElementChild;
+          next.focus();
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          let prev = btn.previousElementSibling || langDropdown.lastElementChild;
+          prev.focus();
+        } else if (e.key === "Escape") {
+          langDropdown.style.display = "none";
+          langBtn.setAttribute("aria-expanded", "false");
+          langBtn.focus();
+        }
+      });
+    });
+    function setLanguage(code) {
+      currentLang = code;
+      const lang = langs.find(l => l.code === code);
+      langFlag.src = lang.flag;
+      langFlag.alt = lang.name + " bayrağı";
+      langName.textContent = lang.name;
+      document.documentElement.lang = code;
+      updateTexts();
+      updateResultMessage();
+    }
+    function updateResultMessage(){
+      const t = translations[currentLang];
+      if(!messageDisplay.textContent && !messageDisplay.innerHTML) return;
+      if (
+        messageDisplay.innerHTML.includes("kazandınız") ||
+        messageDisplay.innerHTML.includes("won") ||
+        messageDisplay.innerHTML.includes("выиграли")
+      ) {
+        const amountMatch = messageDisplay.innerHTML.match(/\d+/);
+        if (amountMatch) {
+          messageDisplay.innerHTML = t.win.replace("{amount}", amountMatch[0]);
+        } else {
+          messageDisplay.innerHTML = t.win.replace("{amount}", "0");
+        }
+      }
+      else if (
+        messageDisplay.textContent.includes("kazanamadınız") ||
+        messageDisplay.textContent.includes("lost") ||
+        messageDisplay.textContent.includes("проиграли")
+      ) {
+        messageDisplay.textContent = t.noWin;
+      }
+    }
+
+    /* --- MOTİVASYONEL MESAJLAR --- */
+    const motivationalQuotes = [
+      "Saçlarının parlaklığı göz kamaştırıyor.",
+      "Her zaman çok mu çok güzelim.",
+      "Güneş mi doğdu yoksa sen mi uyandın?",
+      "Saçlarının dalgalanması kadar güzel bir şey olamaz.",
+      "Cildin ışıl, ışıl.",
+      "Sen muhteşemin kelime anlamının tam karşılığısın.",
+      "Sen yalnız değilsin sadece güçlü bir kadınsın.",
+      "Saçlarım ipek gibi, kokum bebek gibi (cik, cik, cik)😁."
+    ];
+
+    /* --- GECE/GÜNDÜZ MODU --- */
+    const modeToggleBtn = document.getElementById('modeToggleBtn');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+
+    function updateMode() {
+      if (darkMode) {
+        document.body.classList.remove("daymode");  // Gece modu (koyu)
+        sunIcon.style.display = "none";
+        sunIcon.setAttribute("aria-hidden", "true");
+        moonIcon.style.display = "block";
+        moonIcon.setAttribute("aria-hidden", "false");
+        modeToggleBtn.setAttribute("aria-pressed", "true");
+        modeToggleBtn.title = "Gündüz moduna geç";
+      } else {
+        document.body.classList.add("daymode");     // Gündüz modu (açık)
+        sunIcon.style.display = "block";
+        sunIcon.setAttribute("aria-hidden", "false");
+        moonIcon.style.display = "none";
+        moonIcon.setAttribute("aria-hidden", "true");
+        modeToggleBtn.setAttribute("aria-pressed", "false");
+        modeToggleBtn.title = "Gece moduna geç";
+      }
+    }
+
+    modeToggleBtn.addEventListener("click", () => {
+      darkMode = !darkMode;
+      updateMode();
+    });
+
+    /* --- BAŞLANGIÇ AYARLARI --- */
+    setLanguage(currentLang);
+    updateMode();
+    updateButtonsState();
+    updateFreeSpinDisplay();
+  })();
+</script>
+</body>
+</html>
